@@ -64,3 +64,6 @@ Functional database or file-based storage solution.
 Comprehensive documentation covering system design, usage, and deployment.
 Test cases to ensure feature robustness and reliability.
 This Library Management System ensures efficient library operations and an enhanced user experience while serving as a comprehensive solution for modern library resource management needs.
+![Screenshot 2024-12-29 172119](https://github.com/user-attachments/assets/82a19bb6-9f7d-4d95-865d-c89ab3b40643)
+
+![Screenshot 2024-12-29 172441](https://github.com/user-attachments/assets/39edd9d0-4cbd-4148-a841-d400b3490a32)
