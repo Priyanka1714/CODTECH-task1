@@ -1,11 +1,25 @@
 # CODTECH-task1
 Name: Subbagari Priyanka
+
+
 Company: CODTECH IT SOLUTIONS
+
+
 ID: CTO8EXR
+
+
 Domain: Java Programming
+
+
 Duration: December 20 to January 20
+
+
 Mentor: Neela Santhosh Kumar
+
+
 Project Overview: Library Management System
+
+
 
 Objective:
 The Library Management System (LMS) is a Java-based application designed to efficiently manage library resources, including books, magazines, and DVDs. The system ensures smooth operations for both librarians and patrons, facilitating resource management, borrowing, and return processes while incorporating robust search capabilities, user role functionalities, and data persistence mechanisms.
