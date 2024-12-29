@@ -1,0 +1,230 @@
+Library management system using JAVA
+import java.io.*;
+import java.util.*;
+
+class LibrarySystem {
+    private static final String DATA_FILE = "library_data.txt";
+
+    private List<Item> items;
+    private Map<String, User> users;
+
+    public LibrarySystem() {
+        items = new ArrayList<>();
+        users = new HashMap<>();
+        loadLibraryData();
+    }
+
+    public void addItem(Item item) {
+        items.add(item);
+        saveLibraryData();
+    }
+
+    public Item searchItem(String query) {
+        for (Item item : items) {
+            if (item.matches(query)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    public boolean checkOutItem(String title, String userId) {
+        Item item = searchItem(title);
+        User user = users.get(userId);
+        if (item != null && user != null && !item.isCheckedOut()) {
+            item.checkOut(user);
+            saveLibraryData();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean returnItem(String title) {
+        Item item = searchItem(title);
+        if (item != null && item.isCheckedOut()) {
+            item.returnItem();
+            saveLibraryData();
+            return true;
+        }
+        return false;
+    }
+
+    public void addUser(User user) {
+        users.put(user.getId(), user);
+        saveLibraryData();
+    }
+
+    private void loadLibraryData() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(DATA_FILE))) {
+            items = (List<Item>) ois.readObject();
+            users = (Map<String, User>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("No existing data found. Starting fresh.");
+        }
+    }
+
+    private void saveLibraryData() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(DATA_FILE))) {
+            oos.writeObject(items);
+            oos.writeObject(users);
+        } catch (IOException e) {
+            System.out.println("Error saving library data: " + e.getMessage());
+        }
+    }
+}
+
+abstract class Item implements Serializable {
+    private String title;
+    private String category;
+    private boolean checkedOut;
+    private User checkedOutBy;
+
+    public Item(String title, String category) {
+        this.title = title;
+        this.category = category;
+        this.checkedOut = false;
+    }
+
+    public boolean matches(String query) {
+        return title.toLowerCase().contains(query.toLowerCase());
+    }
+
+    public boolean isCheckedOut() {
+        return checkedOut;
+    }
+
+    public void checkOut(User user) {
+        this.checkedOut = true;
+        this.checkedOutBy = user;
+    }
+
+    public void returnItem() {
+        this.checkedOut = false;
+        this.checkedOutBy = null;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+}
+
+class Book extends Item {
+    private String author;
+
+    public Book(String title, String category, String author) {
+        super(title, category);
+        this.author = author;
+    }
+
+    @Override
+    public boolean matches(String query) {
+        return super.matches(query) || author.toLowerCase().contains(query.toLowerCase());
+    }
+}
+
+class DVD extends Item {
+    private int duration;
+
+    public DVD(String title, String category, int duration) {
+        super(title, category);
+        this.duration = duration;
+    }
+}
+
+class User implements Serializable {
+    private String id;
+    private String role;
+
+    public User(String id, String role) {
+        this.id = id;
+        this.role = role;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getRole() {
+        return role;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        LibrarySystem library = new LibrarySystem();
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("1. Add Item\n2. Search Item\n3. Check Out Item\n4. Return Item\n5. Add User\n6. Exit");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1:
+                    System.out.println("Enter item type (book/dvd): ");
+                    String type = scanner.nextLine().toLowerCase();
+                    System.out.println("Enter title: ");
+                    String title = scanner.nextLine();
+                    System.out.println("Enter category: ");
+                    String category = scanner.nextLine();
+                    if (type.equals("book")) {
+                        System.out.println("Enter author: ");
+                        String author = scanner.nextLine();
+                        library.addItem(new Book(title, category, author));
+                    } else if (type.equals("dvd")) {
+                        System.out.println("Enter duration in minutes: ");
+                        int duration = scanner.nextInt();
+                        scanner.nextLine();
+                        library.addItem(new DVD(title, category, duration));
+                    }
+                    break;
+                case 2:
+                    System.out.println("Enter search query: ");
+                    String query = scanner.nextLine();
+                    Item found = library.searchItem(query);
+                    if (found != null) {
+                        System.out.println("Found: " + found.getTitle());
+                    } else {
+                        System.out.println("No item found.");
+                    }
+                    break;
+                case 3:
+                    System.out.println("Enter title: ");
+                    title = scanner.nextLine();
+                    System.out.println("Enter user ID: ");
+                    String userId = scanner.nextLine();
+                    if (library.checkOutItem(title, userId)) {
+                        System.out.println("Item checked out.");
+                    } else {
+                        System.out.println("Unable to check out item.");
+                    }
+                    break;
+                case 4:
+                    System.out.println("Enter title: ");
+                    title = scanner.nextLine();
+                    if (library.returnItem(title)) {
+                        System.out.println("Item returned.");
+                    } else {
+                        System.out.println("Unable to return item.");
+                    }
+                    break;
+                case 5:
+                    System.out.println("Enter user ID: ");
+                    userId = scanner.nextLine();
+                    System.out.println("Enter role (librarian/patron): ");
+                    String role = scanner.nextLine();
+                    library.addUser(new User(userId, role));
+                    break;
+                case 6:
+                    System.out.println("Exiting...");
+                    return;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        }
+    }
+}
